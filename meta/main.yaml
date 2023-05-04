@@ -1,0 +1,22 @@
+---
+galaxy_info:
+  author: amolovhal999@gmail.com
+  description: OpenVpn ansible role for creating a secure tunnel to your private infra.
+  company: "Individual"
+  license: "license (BSD, MIT)"
+  min_ansible_version: 2.1
+  platforms:
+    - name: EL
+      versions:
+        - 7
+    - name: Ubuntu
+      versions:
+        - xenial
+        - bionic
+  galaxy_tags:
+    - vpn
+    - tunnel
+    - system
+    - networking
+  dependencies: []
+...

@@ -1,0 +1,64 @@
+---
+- name: Install iptables-persistent (Debian/Ubuntu)
+  package:
+    name: iptables-persistent
+    state: present
+  when: ansible_distribution == "Ubuntu" or ansible_distribution=="Debian"
+
+- name: Enable ipv4 forwarding
+  sysctl:
+    name: net.ipv4.ip_forward
+    value: 1
+    sysctl_set: true
+    state: present
+    reload: true
+
+- name: Disabling Selinux for Redhat & Centos
+  selinux:
+    state: disabled
+  when: ansible_distribution == "CentOS" or ansible_distribution=="RedHat"
+
+- name: iptables - Apply the routing rule so that traffic can leave the VPN.
+  iptables:
+    table: nat
+    action: append
+    chain: POSTROUTING
+    source: "{{ openvpn_server_network }}/24"
+    out_interface: "{{ out_interface }}"
+    jump: MASQUERADE
+    comment: "Perform NAT readdressing"
+
+- name: iptables - Apply the iptable rule to Allow specific ports for openvpn client
+  iptables:
+    action: insert
+    chain: FORWARD
+    protocol: tcp
+    source: "{{ openvpn_server_network }}/24"
+    jump: ACCEPT
+    destination_port: "{{ item }}"
+    in_interface: tun0
+    comment: "Perform Ports Allow for openvpn client"
+  when: block_all_connection
+  with_items:
+    - "{{ port_list }}"
+
+- name: iptables - Block all communication
+  iptables:
+    action: append
+    protocol: tcp
+    chain: FORWARD
+    source: "{{ openvpn_server_network }}/24"
+    jump: DROP
+    in_interface: tun0
+    comment: "Perform all communication blocking for openvpn client"
+  when: block_all_connection
+
+
+- name: save iptables
+  command: netfilter-persistent save
+  when: ansible_distribution == "Ubuntu" or ansible_distribution=="Debian"
+
+- name: reload iptables
+  command: netfilter-persistent reload
+  when: ansible_distribution == "Ubuntu" or ansible_distribution=="Debian"
+...
