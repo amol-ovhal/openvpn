@@ -18,6 +18,6 @@ client_list: clientlist
 revoke_list: revokelist
 block_all_connection: false
 port_list: [80, 443]
-out_interface: ens5
-dns_resolver: 172.31.0.2
+out_interface: eth0
+dns_resolver: 8.8.4.4
 ...
